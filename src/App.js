@@ -7,6 +7,7 @@ import AppContext from './context';
 
 import Home from './pages/Home';
 import Favorites from './pages/Favorites';
+import Orders from './pages/Orders';
 
 function App() {
   const [items, setItems] = React.useState([]);
@@ -18,33 +19,60 @@ function App() {
 
   React.useEffect(() => {
     async function fetchData() {
-      const cartResponse = await axios.get('https://c0519506122a8bb3.mokky.dev/cart');
-      const favoritesResponse = await axios.get('https://c0519506122a8bb3.mokky.dev/favorites');
-      const itemsResponse = await axios.get('https://c0519506122a8bb3.mokky.dev/items');
-
-      setIsLoading(false);
-
-      setCartItems(cartResponse.data);
-      setFavorites(favoritesResponse.data);
-      setItems(itemsResponse.data);
+      try {
+        const [cartResponse, favoritesResponse, itemsResponse] = await Promise.all([
+          axios.get('https://c0519506122a8bb3.mokky.dev/cart'),
+          axios.get('https://c0519506122a8bb3.mokky.dev/favorites'),
+          axios.get('https://c0519506122a8bb3.mokky.dev/items'),
+        ]);
+  
+        setIsLoading(false);
+        setCartItems(cartResponse.data);
+        setFavorites(favoritesResponse.data);
+        setItems(itemsResponse.data);
+      } catch (error) {
+        alert('Ошибка при запросе данных ;(');
+        console.error(error);
+      }
     }
 
     fetchData();
   }, []);
 
-  const onAddToCart = (obj) => {
-    if (cartItems.find((item) => Number(item.id) === Number(obj.id))) {
-      axios.delete(`https://https://c0519506122a8bb3.mokky.dev/cart/${obj.id}`);
-      setCartItems((prev) => prev.filter((item) => Number(item.id) !== Number(obj.id)));
-    } else {
-      axios.post('https://c0519506122a8bb3.mokky.dev/cart', obj);
-      setCartItems((prev) => [...prev, obj]);
+  const onAddToCart = async (obj) => {
+    try {
+      const findItem = cartItems.find((item) => Number(item.parentId) === Number(obj.id));
+      if (findItem) {
+        setCartItems((prev) => prev.filter((item) => Number(item.parentId) !== Number(obj.id)));
+        await axios.delete(`https://c0519506122a8bb3.mokky.dev/cart/${findItem.id}`);
+      } else {
+        setCartItems((prev) => [...prev, obj]);
+        const { data } = await axios.post('https://c0519506122a8bb3.mokky.dev/cart', obj);
+        setCartItems((prev) =>
+          prev.map(item => {
+            if (item.parentId === data.parentId) {
+              return {
+                ...item,
+                id: data.id
+              };
+            }
+            return item;
+          }));
+      }
+    } catch (error) {
+      alert('Ошибка при добавлении в корзину');
+      console.error(error);
     }
   };
 
   const onRemoveItem = (id) => {
-    axios.delete(`https://c0519506122a8bb3.mokky.dev/cart/${id}`);
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
+    try {
+      axios.delete(`https://c0519506122a8bb3.mokky.dev/cart/${id}`);
+      setCartItems((prev) => prev.filter((item) => Number(item.id) !== Number(id)));
+    } catch (error) {
+      alert('Ошибка при удалении из корзины');
+      console.error(error);
+    }
   };
 
   const onAddToFavorite = async (obj) => {
@@ -58,6 +86,7 @@ function App() {
       }
     } catch (error) {
       alert('Не удалось добавить в избранное');
+      console.error(error);
     }
   };
 
@@ -66,7 +95,7 @@ function App() {
   };
 
   const isItemAdded = (id) => {
-    return cartItems.some((obj) => Number(obj.id) === Number(id));
+    return cartItems.some((obj) => Number(obj.parentId) === Number(id));
   };
   
   return (
@@ -76,19 +105,23 @@ function App() {
           favorites,
           isItemAdded,
           onAddToFavorite,
+          onAddToCart,
           setCartOpened,
           setCartItems
       }}>
       <div className="wrapper clear">
-        {cartOpened && (
-          <Drawer items={cartItems} onClose={() => setCartOpened(false)} onRemove={onRemoveItem} />
-        )}
+        <Drawer
+           items={cartItems}
+           onClose={() => setCartOpened(false)}
+           onRemove={onRemoveItem}
+           opened={cartOpened}
+        />
 
         <Header onClickCart={() => setCartOpened(true)} />
 
         <Routes>
           {<Route
-            path="/"
+            path=""
             element={
               <Home
                 items={items}
@@ -110,6 +143,16 @@ function App() {
             path="favorites"
             element={
               <Favorites />
+            }
+            exact
+          />}
+        </Routes>
+
+        <Routes>
+          {<Route
+            path="orders"
+            element={
+              <Orders />
             }
             exact
           />}
