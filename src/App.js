@@ -21,9 +21,9 @@ function App() {
     async function fetchData() {
       try {
         const [cartResponse, favoritesResponse, itemsResponse] = await Promise.all([
-          axios.get('https://c0519506122a8bb3.mokky.dev/cart'),
-          axios.get('https://c0519506122a8bb3.mokky.dev/favorites'),
-          axios.get('https://c0519506122a8bb3.mokky.dev/items'),
+          axios.get('https://ce545cf8367fbdc5.mokky.dev/cart'),
+          axios.get('https://ce545cf8367fbdc5.mokky.dev/favorites'),
+          axios.get('https://ce545cf8367fbdc5.mokky.dev/items'),
         ]);
   
         setIsLoading(false);
@@ -44,10 +44,10 @@ function App() {
       const findItem = cartItems.find((item) => Number(item.parentId) === Number(obj.id));
       if (findItem) {
         setCartItems((prev) => prev.filter((item) => Number(item.parentId) !== Number(obj.id)));
-        await axios.delete(`https://c0519506122a8bb3.mokky.dev/cart/${findItem.id}`);
+        await axios.delete(`https://ce545cf8367fbdc5.mokky.dev/cart/${findItem.id}`);
       } else {
         setCartItems((prev) => [...prev, obj]);
-        const { data } = await axios.post('https://c0519506122a8bb3.mokky.dev/cart', obj);
+        const { data } = await axios.post('https://ce545cf8367fbdc5.mokky.dev/cart', obj);
         setCartItems((prev) =>
           prev.map(item => {
             if (item.parentId === data.parentId) {
@@ -67,7 +67,7 @@ function App() {
 
   const onRemoveItem = (id) => {
     try {
-      axios.delete(`https://c0519506122a8bb3.mokky.dev/cart/${id}`);
+      axios.delete(`https://ce545cf8367fbdc5.mokky.dev/cart/${id}`);
       setCartItems((prev) => prev.filter((item) => Number(item.id) !== Number(id)));
     } catch (error) {
       alert('Ошибка при удалении из корзины');
@@ -78,10 +78,10 @@ function App() {
   const onAddToFavorite = async (obj) => {
     try {
       if (favorites.find((favObj) => Number(favObj.id) === Number(obj.id))) {
-        axios.delete(`https://c0519506122a8bb3.mokky.dev/favorites/${obj.id}`);
+        axios.delete(`https://ce545cf8367fbdc5.mokky.dev/favorites/${obj.id}`);
         setFavorites((prev) => prev.filter((item) => Number(item.id) !== Number(obj.id)));
       } else {
-        const { data } = await axios.post('https://c0519506122a8bb3.mokky.dev/favorites', obj);
+        const { data } = await axios.post('https://ce545cf8367fbdc5.mokky.dev/favorites', obj);
         setFavorites((prev) => [...prev, data]);
       }
     } catch (error) {
@@ -121,7 +121,7 @@ function App() {
 
         <Routes>
           {<Route
-            path=""
+            path="/react-sneakers/"
             element={
               <Home
                 items={items}
@@ -140,7 +140,7 @@ function App() {
 
         <Routes>
           {<Route
-            path="favorites"
+            path="/react-sneakers/favorites"
             element={
               <Favorites />
             }
@@ -150,7 +150,7 @@ function App() {
 
         <Routes>
           {<Route
-            path="orders"
+            path="/react-sneakers/orders"
             element={
               <Orders />
             }

@@ -17,7 +17,7 @@ function Drawer({ onClose, onRemove, items = [], opened }) {
     const onClickOrder = async () => {
         try {
             setIsLoading(true);
-            const { data } = await axios.post('https://c0519506122a8bb3.mokky.dev/orders', {
+            const { data } = await axios.post('https://ce545cf8367fbdc5.mokky.dev/orders', {
                 items: cartItems,
             });
             setOrderId(data.id);
@@ -26,7 +26,7 @@ function Drawer({ onClose, onRemove, items = [], opened }) {
 
             for (let i = 0; i < cartItems.length; i++) {
                 const item = cartItems[i];
-                await axios.delete('https://c0519506122a8bb3.mokky.dev/cart/' + item.id);
+                await axios.delete('https://ce545cf8367fbdc5.mokky.dev/cart/' + item.id);
                 await delay(1000);
             }
         } catch (error) {
@@ -49,7 +49,7 @@ function Drawer({ onClose, onRemove, items = [], opened }) {
                 <div className={drawerStyles.items}>
                     {items.map((obj) => (
                         <div key={obj.id} className={drawerStyles.cartItem}>
-                            <img className={drawerStyles.cartItemImg} src={obj.imageUrl} alt='Sneakers' />
+                            <img className={drawerStyles.cartItemImg} src={obj.imageUrl} alt='Flowers' />
                             <div className="mr-20 flex">
                                 <p className="mb-5">{obj.title}</p>
                                 <b>{obj.price} руб.</b>
@@ -82,7 +82,7 @@ function Drawer({ onClose, onRemove, items = [], opened }) {
                description={
                    isOrderComplete
                       ? `Ваш заказ #${orderId} скоро будет передан курьерской доставке`
-                      : "Добавьте хотя бы одну пару кроссовок, чтобы сделать заказ."
+                      : "Добавьте хотя бы один букет, чтобы сделать заказ."
                 }
                image={isOrderComplete ? "img/complete-order.jpg" : "img/empty-cart.jpg"}
             />
